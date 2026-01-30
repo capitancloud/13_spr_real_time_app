@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wifi, WifiOff, Server, Monitor, Zap } from "lucide-react";
+import { Wifi, WifiOff, Server, Monitor, Zap, Info } from "lucide-react";
+import { ConceptBox } from "./ConceptBox";
 
 type ConnectionStatus = "connected" | "disconnected" | "reconnecting";
 
@@ -19,7 +20,6 @@ export const ConnectionDiagram = ({ status, isPaused }: ConnectionDiagramProps) 
   const [packets, setPackets] = useState<DataPacket[]>([]);
   const [packetId, setPacketId] = useState(0);
 
-  // Simula pacchetti di dati che viaggiano
   useEffect(() => {
     if (status !== "connected" || isPaused) return;
 
@@ -53,125 +53,153 @@ export const ConnectionDiagram = ({ status, isPaused }: ConnectionDiagramProps) 
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto p-8">
-      {/* Titolo sezione */}
-      <div className="text-center mb-8">
-        <h3 className="text-xl font-semibold text-foreground mb-2">
-          Connessione Persistente WebSocket
-        </h3>
-        <p className="text-muted-foreground text-sm">
-          {status === "connected" && "La connessione resta aperta per scambi bidirezionali continui"}
-          {status === "disconnected" && "Connessione interrotta - nessun flusso di dati"}
-          {status === "reconnecting" && "Tentativo di riconnessione in corso..."}
-        </p>
+    <div className="relative w-full max-w-4xl mx-auto">
+      {/* Info box sopra il diagramma */}
+      <div className="mb-8">
+        <ConceptBox type="info" title="🔌 Cosa stai vedendo">
+          <p>
+            Questo diagramma mostra una <strong>connessione WebSocket</strong> tra il tuo browser (Client) 
+            e un server. I pallini colorati sono <strong>pacchetti di dati</strong> che viaggiano 
+            in tempo reale. Nota come possono andare in <em>entrambe le direzioni</em> senza aspettare!
+          </p>
+        </ConceptBox>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
-        {/* Client */}
-        <motion.div 
-          className={`glass-card p-6 flex flex-col items-center gap-3 ${status === "connected" ? getStatusGlow() : ""}`}
-          animate={{ 
-            scale: status === "reconnecting" ? [1, 1.02, 1] : 1,
-          }}
-          transition={{ duration: 1, repeat: status === "reconnecting" ? Infinity : 0 }}
-        >
-          <Monitor className="w-12 h-12 text-primary" />
-          <span className="font-semibold">Client</span>
-          <span className="text-xs text-muted-foreground">Browser</span>
-        </motion.div>
+      <div className="p-8 glass-card">
+        {/* Titolo sezione */}
+        <div className="text-center mb-8">
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Connessione Persistente WebSocket
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {status === "connected" && "✅ La connessione resta aperta per scambi bidirezionali continui"}
+            {status === "disconnected" && "❌ Connessione interrotta - nessun flusso di dati"}
+            {status === "reconnecting" && "🔄 Tentativo di riconnessione in corso..."}
+          </p>
+        </div>
 
-        {/* Connection Line */}
-        <div className="flex-1 relative h-24">
-          {/* Linea di connessione */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2">
-            <div className={`h-full rounded-full ${
-              status === "connected" ? "connection-line" : 
-              status === "reconnecting" ? "bg-warning/50 animate-reconnect" :
-              "connection-line-inactive"
-            }`} />
-          </div>
+        <div className="flex items-center justify-between gap-4">
+          {/* Client */}
+          <motion.div 
+            className={`glass-card p-6 flex flex-col items-center gap-3 ${status === "connected" ? getStatusGlow() : ""}`}
+            animate={{ 
+              scale: status === "reconnecting" ? [1, 1.02, 1] : 1,
+            }}
+            transition={{ duration: 1, repeat: status === "reconnecting" ? Infinity : 0 }}
+          >
+            <Monitor className="w-12 h-12 text-primary" />
+            <span className="font-semibold">Client</span>
+            <span className="text-xs text-muted-foreground">Il tuo Browser</span>
+          </motion.div>
 
-          {/* Indicatore stato connessione */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <motion.div 
-              className={`w-10 h-10 rounded-full ${getStatusColor()} flex items-center justify-center ${getStatusGlow()}`}
-              animate={{ 
-                scale: status === "connected" ? [1, 1.1, 1] : 1,
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              {status === "connected" ? (
-                <Wifi className="w-5 h-5 text-success-foreground" />
-              ) : status === "reconnecting" ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                >
-                  <Wifi className="w-5 h-5 text-warning-foreground" />
-                </motion.div>
-              ) : (
-                <WifiOff className="w-5 h-5 text-destructive-foreground" />
-              )}
-            </motion.div>
-          </div>
+          {/* Connection Line */}
+          <div className="flex-1 relative h-24">
+            <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2">
+              <div className={`h-full rounded-full ${
+                status === "connected" ? "connection-line" : 
+                status === "reconnecting" ? "bg-warning/50 animate-reconnect" :
+                "connection-line-inactive"
+              }`} />
+            </div>
 
-          {/* Pacchetti animati */}
-          <AnimatePresence>
-            {status === "connected" && !isPaused && packets.map((packet) => (
-              <motion.div
-                key={packet.id}
-                className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center ${
-                  packet.type === "message" ? "bg-primary" :
-                  packet.type === "event" ? "bg-data-packet" :
-                  "bg-success"
-                }`}
-                initial={{ 
-                  left: packet.direction === "toClient" ? "calc(100% - 24px)" : "0px",
-                  opacity: 1,
-                  scale: 0.5
-                }}
+            {/* Connection status indicator */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <motion.div 
+                className={`w-10 h-10 rounded-full ${getStatusColor()} flex items-center justify-center ${getStatusGlow()}`}
                 animate={{ 
-                  left: packet.direction === "toClient" ? "0px" : "calc(100% - 24px)",
-                  opacity: [1, 1, 0],
-                  scale: [0.5, 1, 0.5]
+                  scale: status === "connected" ? [1, 1.1, 1] : 1,
                 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1.2, ease: "easeInOut" }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
-                <Zap className="w-3 h-3 text-white" />
+                {status === "connected" ? (
+                  <Wifi className="w-5 h-5 text-success-foreground" />
+                ) : status === "reconnecting" ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Wifi className="w-5 h-5 text-warning-foreground" />
+                  </motion.div>
+                ) : (
+                  <WifiOff className="w-5 h-5 text-destructive-foreground" />
+                )}
               </motion.div>
-            ))}
-          </AnimatePresence>
+            </div>
+
+            {/* Animated packets */}
+            <AnimatePresence>
+              {status === "connected" && !isPaused && packets.map((packet) => (
+                <motion.div
+                  key={packet.id}
+                  className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center ${
+                    packet.type === "message" ? "bg-primary" :
+                    packet.type === "event" ? "bg-data-packet" :
+                    "bg-success"
+                  }`}
+                  initial={{ 
+                    left: packet.direction === "toClient" ? "calc(100% - 24px)" : "0px",
+                    opacity: 1,
+                    scale: 0.5
+                  }}
+                  animate={{ 
+                    left: packet.direction === "toClient" ? "0px" : "calc(100% - 24px)",
+                    opacity: [1, 1, 0],
+                    scale: [0.5, 1, 0.5]
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                >
+                  <Zap className="w-3 h-3 text-white" />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Server */}
+          <motion.div 
+            className={`glass-card p-6 flex flex-col items-center gap-3 ${status === "connected" ? getStatusGlow() : ""}`}
+            animate={{ 
+              scale: status === "reconnecting" ? [1, 1.02, 1] : 1,
+            }}
+            transition={{ duration: 1, repeat: status === "reconnecting" ? Infinity : 0, delay: 0.5 }}
+          >
+            <Server className="w-12 h-12 text-primary" />
+            <span className="font-semibold">Server</span>
+            <span className="text-xs text-muted-foreground">WebSocket Server</span>
+          </motion.div>
         </div>
 
-        {/* Server */}
-        <motion.div 
-          className={`glass-card p-6 flex flex-col items-center gap-3 ${status === "connected" ? getStatusGlow() : ""}`}
-          animate={{ 
-            scale: status === "reconnecting" ? [1, 1.02, 1] : 1,
-          }}
-          transition={{ duration: 1, repeat: status === "reconnecting" ? Infinity : 0, delay: 0.5 }}
-        >
-          <Server className="w-12 h-12 text-primary" />
-          <span className="font-semibold">Server</span>
-          <span className="text-xs text-muted-foreground">WebSocket</span>
-        </motion.div>
+        {/* Legend */}
+        <div className="flex justify-center gap-6 mt-8 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-primary" />
+            <span className="text-xs text-muted-foreground">Messaggi</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-data-packet" />
+            <span className="text-xs text-muted-foreground">Eventi</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-success" />
+            <span className="text-xs text-muted-foreground">Stati</span>
+          </div>
+        </div>
       </div>
 
-      {/* Legenda */}
-      <div className="flex justify-center gap-6 mt-8">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-primary" />
-          <span className="text-xs text-muted-foreground">Messaggi</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-data-packet" />
-          <span className="text-xs text-muted-foreground">Eventi</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-success" />
-          <span className="text-xs text-muted-foreground">Stati</span>
-        </div>
+      {/* Explanation boxes below */}
+      <div className="mt-8 grid md:grid-cols-2 gap-4">
+        <ConceptBox type="tip" title="👀 Osserva i pacchetti">
+          I pallini che vedi viaggiare rappresentano dati. Nota come vanno sia 
+          <strong> dal server al client</strong> (la maggior parte) che 
+          <strong> dal client al server</strong>. Questa è la magia del real-time: 
+          comunicazione bidirezionale!
+        </ConceptBox>
+        
+        <ConceptBox type="success" title="✨ Nessun refresh necessario">
+          In un'app tradizionale dovresti premere F5 per vedere nuovi dati. 
+          Qui arrivano da soli! È come la differenza tra guardare una foto 
+          e guardare un video in diretta.
+        </ConceptBox>
       </div>
     </div>
   );
