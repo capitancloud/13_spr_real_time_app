@@ -9,6 +9,7 @@ import { ComparisonView } from "@/components/ComparisonView";
 import { CodeExplanation } from "@/components/CodeExplanation";
 import { PollingComparison } from "@/components/PollingComparison";
 import { ConceptBox } from "@/components/ConceptBox";
+import { LogoutButton } from "@/components/LogoutButton";
 
 type ConnectionStatus = "connected" | "disconnected" | "reconnecting";
 
@@ -42,6 +43,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Logout Button - Fixed position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LogoutButton />
+      </div>
+
       {/* Hero Section */}
       <Hero onExplore={handleExplore} />
 
