@@ -134,14 +134,6 @@ export function LoginPage() {
             </Button>
           </form>
 
-          {/* Info box */}
-          <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border/30">
-            <p className="text-xs text-muted-foreground text-center">
-              🔒 Il codice viene verificato tramite <strong>hash SHA-256</strong>.
-              <br />
-              Nessun codice in chiaro viene memorizzato nel sistema.
-            </p>
-          </div>
         </div>
       </motion.div>
     </div>
