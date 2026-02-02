@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Eye, EyeOff, AlertCircle, Zap } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import superProgrammatoreLogo from '@/assets/super-programmatore-logo.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { hashCode } from '@/lib/auth';
@@ -62,12 +63,16 @@ export function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
+              className="mb-6"
             >
-              <Zap className="w-8 h-8 text-primary" />
+              <img 
+                src={superProgrammatoreLogo} 
+                alt="Super Programmatore Logo" 
+                className="w-48 h-auto mx-auto"
+              />
             </motion.div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
               🚀 Real-Time Hub
